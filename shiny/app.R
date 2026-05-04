@@ -19,7 +19,7 @@
 
 # -- Packages ---------------------------------------------------------------
 required <- c("shiny", "bslib", "DBI", "RPostgres", "pool", "DT", "dplyr",
-              "highcharter", "scales", "stern", "jsonlite")
+              "highcharter", "scales", "stern", "jsonlite", "showtext")
 missing <- required[!sapply(required, requireNamespace, quietly = TRUE)]
 if (length(missing) > 0) {
   cran_pkgs <- setdiff(missing, "stern")
@@ -32,7 +32,7 @@ if (length(missing) > 0) {
 suppressPackageStartupMessages({
   library(shiny);   library(bslib);  library(DBI);     library(RPostgres)
   library(pool);    library(DT);     library(dplyr);   library(highcharter)
-  library(scales);  library(stern); library(rsconnect)
+  library(scales);  library(stern); library(rsconnect); library(showtext)
 })
 stern_setup_fonts()
 
