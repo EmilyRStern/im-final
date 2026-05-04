@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -l FY2026_049_Assistance_Full_20260406.zip)",
+      "Bash(mkdir -p data/raw/usaspending_nsf data/final)",
+      "Bash(mv data/FY2023_049_Assistance_Full_20260406.zip data/raw/usaspending_nsf/FY2023.zip)",
+      "Bash(mv data/FY2024_049_Assistance_Full_20260406.zip data/raw/usaspending_nsf/FY2024.zip)",
+      "Bash(mv data/FY2025_049_Assistance_Full_20260406.zip data/raw/usaspending_nsf/FY2025.zip)",
+      "Bash(mv data/FY2026_049_Assistance_Full_20260406.zip data/raw/usaspending_nsf/FY2026.zip)",
+      "Bash(rm -rf final_project/data/usaspending_raw)",
+      "Bash(rm -rf final_project/data/grants_data)",
+      "Bash(rm -rf final_project/data/final)",
+      "Bash(rmdir final_project/data)",
+      "Bash(rmdir final_project)",
+      "Bash(grep -v \"^$\")",
+      "Bash(Rscript --version)",
+      "PowerShell($paths = @\\(\"C:\\\\Program Files\\\\R\", \"C:\\\\Program Files \\(x86\\)\\\\R\", \"$env:LOCALAPPDATA\\\\Programs\\\\R\"\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { Get-ChildItem $p -Directory | Select-Object FullName } }; Write-Output \"---\"; python -c \"import psycopg2; print\\('psycopg2 OK', psycopg2.__version__\\)\" 2>&1)",
+      "Bash(\"/c/Program Files/R/R-4.6.0/bin/Rscript.exe\" scripts/eda.R)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" scripts/eda.R)",
+      "Bash('/c/Program Files/R/R-4.5.1/bin/Rscript.exe' -e ' *)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" scripts/_eda2.R)",
+      "PowerShell($out = & \"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"cat\\('R works\\\\n'\\); cat\\(rownames\\(installed.packages\\(\\)\\), sep='\\\\n'\\)\" 2>&1; $out | Select-String -Pattern \"^stern\" -SimpleMatch; Write-Output \"---\"; Write-Output \"exit: $LASTEXITCODE\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"if \\(!'remotes' %in% rownames\\(installed.packages\\(\\)\\)\\) install.packages\\('remotes', repos='https://cloud.r-project.org'\\); remotes::install_github\\('EmilyRStern/stern', upgrade='never', quiet=FALSE\\)\" 2>&1)",
+      "PowerShell(cd \"C:\\\\Users\\\\erose\\\\Documents\\\\GitHub\\\\im-final\"; $job = Start-Job -ScriptBlock { Set-Location $using:PWD; & \"C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin\\\\Rscript.exe\" -e \"options\\(error = function\\(\\) { traceback\\(\\); quit\\(status=1\\) }\\); message\\('about to runApp'\\); shiny::runApp\\('shiny/', port = 4848, launch.browser = FALSE, host = '127.0.0.1'\\)\" 2>&1 }; Start-Sleep -Seconds 12; Receive-Job $job; Write-Output \"--- port? ---\"; netstat -ano | Select-String \":4848\"; Stop-Job $job -ErrorAction SilentlyContinue; Remove-Job $job -ErrorAction SilentlyContinue; Get-Process Rscript -ErrorAction SilentlyContinue | Stop-Process -Force)",
+      "Bash(\"/c/Program Files/R/R-4.5.1/bin/Rscript.exe\" scripts/eda_pipeline.R)",
+      "Bash(Rscript -e 'parse\\(\"C:/Users/erose/Documents/GitHub/im-final/shiny/app.R\"\\); cat\\(\"OK: parses cleanly\\\\n\"\\)')",
+      "PowerShell($env:PATH += ';C:\\\\Program Files\\\\R\\\\R-4.5.1\\\\bin'; Rscript -e 'parse\\(\\\\\"C:/Users/erose/Documents/GitHub/im-final/shiny/app.R\\\\\"\\); cat\\(\\\\\"OK\\\\n\\\\\"\\)' 2>&1 | Select-Object -Last 30)",
+      "Bash(curl -s -o /tmp/shiny_index.html -w \"HTTP %{http_code} | size %{size_download}\\\\n\" http://127.0.0.1:4848/)",
+      "Bash(curl -s http://127.0.0.1:4848/ -o /c/Users/erose/Documents/GitHub/im-final/shiny/.last_index.html)",
+      "Bash(grep -v \"RemoteException\\\\|NativeCommandError\\\\|CategoryInfo\\\\|FullyQualifiedErrorId\\\\|^$\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api *)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(curl -sL -o /c/Users/erose/Documents/GitHub/im-final/shiny/us-all.geo.json https://code.highcharts.com/mapdata/countries/us/us-all.geo.json)",
+      "WebFetch(domain:www.urban.org)"
+    ]
+  }
+}

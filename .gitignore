@@ -1,0 +1,24 @@
+# R / RStudio
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rcheck/
+
+# Secrets
+.Renviron
+
+# Raw source files — too large for GitHub; users acquire per data/README.md
+data/
+schema_design/
+
+# Shiny deploy metadata + local dev artifacts
+shiny/rsconnect/
+shiny/.run_local.R
+shiny/.last_index.html
+shiny/.urban.html
+shiny/shiny_run.log
+
+# OS noise
+.DS_Store
+Thumbs.db
