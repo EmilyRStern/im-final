@@ -4,6 +4,7 @@
 .RData
 .Ruserdata
 *.Rcheck/
+.claude/
 
 # Secrets
 .Renviron
