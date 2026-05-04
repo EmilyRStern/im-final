@@ -2485,7 +2485,7 @@
     },
     "stern": {
       "Source": "github",
-      "Repository": null,
+      "Repository": "EmilyRStern/stern",
       "description": {
         "Package": "stern",
         "Type": "Package",
