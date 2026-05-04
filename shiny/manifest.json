@@ -1610,6 +1610,9 @@
         "Archs": "x64"
       }
     },
+          "showtext": {
+        "Source": "CRAN"
+      },
     "lattice": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com",
@@ -2482,7 +2485,7 @@
     },
     "stern": {
       "Source": "github",
-      "Repository": "EmilyRStern/stern",
+      "Repository": null,
       "description": {
         "Package": "stern",
         "Type": "Package",
