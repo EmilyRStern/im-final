@@ -12,13 +12,23 @@
 # written to data/pipeline_log_YYYYMMDD_HHMMSS.txt.
 # =============================================================================
 
-# Resolve scripts directory: the directory this file lives in.
-SCRIPT_DIR <- tryCatch(
-  dirname(normalizePath(rstudioapi::getSourceEditorContext()$path, mustWork = FALSE)),
-  error = function(e) file.path(getwd(), "scripts")
-)
+# Resolve project root via .Renviron (same pattern as the other pipeline
+# scripts). Earlier this read rstudioapi::getSourceEditorContext()$path,
+# which returns the *active editor tab*'s path -- so if shiny/app.R was
+# open, SCRIPT_DIR became shiny/ and the source() calls below looked for
+# 01_process_raw.R in the wrong place.
+find_project_root <- function() {
+  d <- normalizePath(getwd(), mustWork = FALSE)
+  for (i in 1:6) {
+    if (file.exists(file.path(d, ".Renviron"))) return(d)
+    d <- dirname(d)
+  }
+  stop("Cannot find .Renviron. Run from im-final/ or a subfolder.")
+}
+PROJECT_ROOT <- find_project_root()
+SCRIPT_DIR   <- file.path(PROJECT_ROOT, "scripts")
 
-log_file <- file.path(SCRIPT_DIR, "..", "data",
+log_file <- file.path(PROJECT_ROOT, "data",
                       paste0("pipeline_log_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt"))
 con_log <- file(log_file, open = "wt")
 sink(con_log, split = TRUE)

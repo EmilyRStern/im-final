@@ -45,6 +45,7 @@ find_project_root <- function() {
 }
 PROJECT_ROOT <- find_project_root()
 readRenviron(file.path(PROJECT_ROOT, ".Renviron"))
+source(file.path(PROJECT_ROOT, "shiny", "_helpers.R"))
 
 FINAL   <- file.path(PROJECT_ROOT, "data", "final")
 PARQUET <- file.path(FINAL, "usaspending_nsf.parquet")
@@ -74,10 +75,11 @@ dbExecute(pg, "TRUNCATE transactions, terminations, awards, change_log,
                        snapshots, opportunities, recipients
                RESTART IDENTITY CASCADE;")
 
-# CFDA number -> NSF directorate lookup, used in the awards aggregate and the
-# transactions select below. Inlined in both places (rather than DRY'd) to
-# keep each SQL statement readable on its own.
+# CFDA number -> NSF directorate lookup. Source of truth lives in
+# shiny/_helpers.R; spliced into the awards and transactions queries below.
 # Reference: NSF Assistance Listings catalog.
+cfda_case_any_value <- cfda_directorate_case_sql("ANY_VALUE(cfda_number)")
+cfda_case_plain     <- cfda_directorate_case_sql("cfda_number")
 
 # -- 1. recipients -----------------------------------------------------------
 message("\n[1/5] recipients")
@@ -147,14 +149,7 @@ awards_df <- dbGetQuery(duck, glue("
     ANY_VALUE(award_id_fain)                     AS award_id_fain,
     ANY_VALUE(recipient_uei)                     AS recipient_uei,
     1                                            AS awarding_agency_id,
-    CASE ANY_VALUE(cfda_number)
-      WHEN '47.041' THEN 'ENG' WHEN '47.049' THEN 'MPS'
-      WHEN '47.050' THEN 'GEO' WHEN '47.070' THEN 'CISE'
-      WHEN '47.074' THEN 'BIO' WHEN '47.075' THEN 'SBE'
-      WHEN '47.076' THEN 'EDU' WHEN '47.078' THEN 'OPP'
-      WHEN '47.079' THEN 'OD'  WHEN '47.083' THEN 'OIA'
-      WHEN '47.084' THEN 'TIP' ELSE 'OTHER'
-    END                                          AS awarding_sub_agency_name,
+    {cfda_case_any_value}                        AS awarding_sub_agency_name,
     ANY_VALUE(cfda_number)                       AS cfda_number,
     ANY_VALUE(cfda_title)                        AS cfda_title,
     MAX(total_obligated_amount)                  AS total_obligated_amount,
@@ -192,14 +187,7 @@ tx_df <- dbGetQuery(duck, glue("
     award_id_fain,
     recipient_uei,
     cfda_number,
-    CASE cfda_number
-      WHEN '47.041' THEN 'ENG' WHEN '47.049' THEN 'MPS'
-      WHEN '47.050' THEN 'GEO' WHEN '47.070' THEN 'CISE'
-      WHEN '47.074' THEN 'BIO' WHEN '47.075' THEN 'SBE'
-      WHEN '47.076' THEN 'EDU' WHEN '47.078' THEN 'OPP'
-      WHEN '47.079' THEN 'OD'  WHEN '47.083' THEN 'OIA'
-      WHEN '47.084' THEN 'TIP' ELSE 'OTHER'
-    END                               AS awarding_sub_agency_name,
+    {cfda_case_plain}                 AS awarding_sub_agency_name,
     action_date,
     action_type_description,
     federal_action_obligation,
@@ -214,6 +202,7 @@ tx_df <- tx_df |> filter(award_unique_key %in% award_keys) |>
                   distinct(transaction_unique_key, .keep_all = TRUE)
 if (nrow(tx_df) < n_before)
   message(glue("  dropped {n_before - nrow(tx_df)} transactions with no matching award or duplicate key"))
+tx_df$pulled_at <- Sys.time()
 dbWriteTable(pg, "transactions", tx_df, append = TRUE, row.names = FALSE)
 message(glue("  {format(nrow(tx_df), big.mark=',')} rows ",
              "({round(as.numeric(difftime(Sys.time(), t0, units='secs')), 1)}s)"))
@@ -233,6 +222,7 @@ terms_df <- dbGetQuery(duck, glue("
     TRY_CAST(nsf_total_budget AS DOUBLE)              AS nsf_total_budget,
     TRY_CAST(estimated_remaining AS DOUBLE)           AS estimated_remaining,
     directorate, division, nsf_program_name,
+    abstract,
     is_active
   FROM read_csv_auto('{TERMS}', sample_size=-1, ignore_errors=true)
 "))

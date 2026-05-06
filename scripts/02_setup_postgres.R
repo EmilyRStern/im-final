@@ -43,6 +43,7 @@ find_project_root <- function() {
 }
 PROJECT_ROOT <- find_project_root()
 readRenviron(file.path(PROJECT_ROOT, ".Renviron"))
+source(file.path(PROJECT_ROOT, "shiny", "_helpers.R"))
 
 url <- Sys.getenv("NEON_DB_URL")
 if (!nzchar(url)) stop("NEON_DB_URL not set in .Renviron")
@@ -185,12 +186,19 @@ CREATE TABLE IF NOT EXISTS transactions (
   action_type_description     VARCHAR,        -- 'NEW' / 'CONTINUATION' / 'REVISION' / ...
   federal_action_obligation   DOUBLE PRECISION,  -- positive = new $; negative = clawback
   assistance_type_description VARCHAR,
-  transaction_description     TEXT
+  transaction_description     TEXT,
+  pulled_at                   TIMESTAMPTZ DEFAULT now()
 );
 ")
 dbExecute(con, "CREATE INDEX IF NOT EXISTS ix_tx_action_date  ON transactions(action_date);")
 dbExecute(con, "CREATE INDEX IF NOT EXISTS ix_tx_directorate  ON transactions(awarding_sub_agency_name);")
 dbExecute(con, "CREATE INDEX IF NOT EXISTS ix_tx_action_type  ON transactions(action_type_description);")
+
+# Add pulled_at to transactions if it's missing (CREATE TABLE IF NOT EXISTS
+# above is a no-op when the table already exists, so a new column added
+# to the DDL won't propagate to existing databases without this).
+dbExecute(con, "ALTER TABLE transactions
+                ADD COLUMN IF NOT EXISTS pulled_at TIMESTAMPTZ DEFAULT now();")
 
 # -- 7. terminations ---------------------------------------------------------
 dbExecute(con, "
@@ -208,13 +216,28 @@ CREATE TABLE IF NOT EXISTS terminations (
   directorate                    VARCHAR,
   division                       VARCHAR,
   nsf_program_name               VARCHAR,
+  abstract                       TEXT,
   is_active                      BOOLEAN
 );
 ")
+dbExecute(con, "ALTER TABLE terminations
+                ADD COLUMN IF NOT EXISTS abstract TEXT;")
 
 # -- 8. Analytical views -----------------------------------------------------
 # Each view is named v_<thing> and is read-only. Keep these here (next to the
 # DDL) so the schema and its derived objects ship together.
+#
+# Drop first, then create. Postgres's CREATE OR REPLACE VIEW refuses to drop
+# or rename columns of an existing view, so an iterating schema needs an
+# explicit DROP. CASCADE catches any dependent views (e.g. v_directorate_
+# resilience depends on v_currently_open_opportunities).
+for (v in c("v_monthly_obligations", "v_directorate_resilience",
+            "v_currently_open_opportunities", "v_active_funding",
+            "v_disbursement_progress", "v_awards_with_quality",
+            "v_disruption_by_recipient", "v_disruption_by_directorate",
+            "v_rescinded_opportunities")) {
+  dbExecute(con, sprintf("DROP VIEW IF EXISTS %s CASCADE;", v))
+}
 
 # Opportunities REMOVED from Grants.gov with no matching award (rescissions).
 # Empty until a second Grants.gov snapshot has populated change_log.
@@ -320,25 +343,20 @@ ORDER BY total_obligated_active DESC NULLS LAST;
 
 # Currently-open opportunities (posted/forecasted), with directorate inferred
 # from the first CFDA number.
-dbExecute(con, "
+dbExecute(con, sprintf("
 CREATE OR REPLACE VIEW v_currently_open_opportunities AS
 SELECT
   o.opportunity_id, o.opportunity_number, o.title, o.cfda_numbers,
-  CASE split_part(o.cfda_numbers, ',', 1)
-    WHEN '47.041' THEN 'ENG'  WHEN '47.049' THEN 'MPS'
-    WHEN '47.050' THEN 'GEO'  WHEN '47.070' THEN 'CISE'
-    WHEN '47.074' THEN 'BIO'  WHEN '47.075' THEN 'SBE'
-    WHEN '47.076' THEN 'EDU'  WHEN '47.078' THEN 'OPP'
-    WHEN '47.079' THEN 'OD'   WHEN '47.083' THEN 'OIA'
-    WHEN '47.084' THEN 'TIP'  ELSE 'OTHER'
-  END AS directorate,
+  %s AS directorate,
   o.post_date, o.close_date, o.estimated_total_funding,
   o.award_ceiling, o.award_floor, o.description
 FROM opportunities o
 WHERE o.is_active = TRUE
   AND (o.close_date >= current_date
        OR (o.close_date IS NULL AND o.post_date >= current_date - INTERVAL '18 months'));
-")
+",
+  cfda_directorate_case_sql("split_part(o.cfda_numbers, ',', 1)")
+))
 
 # Directorate resilience: FY25 vs FY26 first-half NEW-award activity, joined
 # to currently-open opportunities count.

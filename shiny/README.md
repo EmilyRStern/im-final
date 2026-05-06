@@ -29,7 +29,7 @@ rsconnect::deployApp(
   appDir       = "shiny/",
   appName      = "nsf-disruption",
   appTitle     = "NSF Grant Lifecycle Disruption Analysis",
-  appFiles     = c("app.R", "us-all.geo.json"),  # don't push .Renviron
+  appFiles     = c("app.R", "_helpers.R", "us-all.geo.json"),  # don't push .Renviron
   forceUpdate  = TRUE,
   envVars      = "NEON_DB_URL"
 )
@@ -45,6 +45,8 @@ dashboard: **Applications → nsf-disruption → Settings → Variables**.
 ## Files
 
 - `app.R` — the dashboard
+- `_helpers.R` — CFDA-to-directorate and project-title-to-topic
+  mappings, also sourced by the pipeline scripts in [`scripts/`](../scripts/)
 - `us-all.geo.json` — US states GeoJSON for the choropleth (cached
   locally because the highcharts CDN blocks R's default User-Agent)
 - `README.md` — this file

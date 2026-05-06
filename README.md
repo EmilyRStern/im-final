@@ -119,17 +119,26 @@ visual.
 - **Anchored on Apr 30, 2025 funding freeze.** EO 14332 (Aug 7, 2025)
   follows the operational shock and formalizes oversight; the freeze
   itself is the first observable disruption to the grant pipeline.
-- **At-risk pool denominators.** Lifecycle-tab rates are computed
-  against awards with USAspending activity post-Apr 2025 or in the
-  citizen tracker — pre-disruption-completed awards are excluded.
+- **At-risk pool = awards live on Apr 30, 2025.** Lifecycle and
+  state-choropleth rates are computed against awards whose period of
+  performance spanned the freeze date — the population that was
+  actually at risk on the day of the disruption. This denominator is
+  exogenous to the disruption itself.
 - **Positive vs. negative obligations are kept separate.** USAspending
   records deobligations as negative `federal_action_obligation`. Net
   obligation can hide disruption (e.g., $100M new + $50M clawback ≠
   "$50M"). Views split `gross_obligated` from `gross_deobligated`.
-- **Same-month FY23–25 baseline.** The Timeline tab compares FY26
-  monthly totals against the mean ±1σ of the same calendar month in
-  FY23, FY24, and FY25 — controlling for NSF's annual August-spike,
-  October-trough cycle.
+- **Same-month pre-freeze baseline.** The Timeline tab compares FY26
+  monthly totals against the mean ±1σ of the same calendar month
+  across all pre-freeze months (Jan 2023 – Apr 2025), controlling for
+  NSF's annual August-spike, October-trough cycle. Two integrity rules:
+  the Feb 2024 TIP $151M administrative re-obligation is excluded so
+  it doesn't inflate the Feb baseline mean; post-Apr-30-2025 months
+  are not pulled back into the baseline.
+- **Pre-period for directorate %-drop = FY25 H1.** The headline
+  "TIP pre-award disruption" callout compares FY26 H1 (Oct 2025–Mar
+  2026) NEW obligations to FY25 H1 (Oct 2024–Mar 2025), the closest-
+  in-time half-year that is entirely pre-freeze.
 - **Citizen-tracker undercount detection.** The Lifecycle tab's
   "possible untracked disruption" segment cross-references USAspending
   transactions to flag awards with >$100K post-Apr 2025 net
