@@ -104,15 +104,7 @@ chart_card <- function(caption, height_px, output_id, footer = NULL) {
   )
 }
 
-# Compact anchor line shown under each tab's h2 so readers landing on any
-# tab know the time anchor without clicking back to Timeline.
-anchor_line <- function() {
-  div(style = sprintf(
-    "font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem;
-     color: %s; letter-spacing: 0.02em; margin-top: -2px;
-     margin-bottom: 6px;", stern_text_muted),
-    "Anchor: April 30, 2025 NSF funding freeze.")
-}
+
 
 # -- UI ---------------------------------------------------------------------
 ui <- bslib::page_navbar(
@@ -170,7 +162,6 @@ ui <- bslib::page_navbar(
         h2("Disruption and recovery across academic NSF funding",
            style = sprintf("color: %s; margin-top: 8px;",
                            stern_text_primary)),
-        anchor_line(),
 
         uiOutput("pipeline_stats"),
 
@@ -216,13 +207,9 @@ ui <- bslib::page_navbar(
         h2("Institution Explorer",
            style = sprintf("color: %s; margin-top: 8px;",
                            stern_text_primary)),
-        anchor_line(),
         narrative_p(
           "Pick a state (or leave at \"All states\") and start typing
-           any part of an institution's name. Variants of the same
-           institution (e.g. \"Alamo Community College\" and \"Alamo
-           Community College District\") are merged into a single entry
-           — the lookup pools all their UEIs. Active funding spans the
+           any part of an institution's name. Active funding spans the
            full portfolio; termination metrics use the at-risk pool
            (awards live on Apr 30, 2025) as denominator."),
 
