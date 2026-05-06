@@ -271,8 +271,7 @@ ui <- bslib::page_navbar(
             section_caption("Where this institution has been most affected")),
         narrative_p(
           "Awards flagged by the citizen-science termination tracker.
-           Click the + on a row to read the project abstract where one
-           was captured. Sorted by net deobligation descending. If the
+           Click 'read abstract' to view program description. If the
            institution has no terminations on record, this table will
            be empty."),
         card(
@@ -294,7 +293,7 @@ ui <- bslib::page_navbar(
                    font-size: 0.92rem; line-height: 1.45;",
         h3("About this analysis",
            style = sprintf("color: %s;", stern_text_primary)),
-        p("Lifecycle analysis of NSF grant disruption (FY23-FY26), anchored
+        p("Lifecycle analysis of NSF grant disruption in universities (FY23-FY26), anchored
           on the April 30, 2025 NSF funding freeze. EO 14332
           \"Improving Oversight of Federal Grantmaking\" (Aug 7, 2025)
           follows the operational shock and formalizes oversight. Three
@@ -323,13 +322,6 @@ ui <- bslib::page_navbar(
                   synthetic-control analysis is reported. Patterns
                   consistent with policy targeting are noted as
                   patterns, not as caused by any specific action."),
-          tags$li(strong("At-risk pool denominator."), " Lifecycle and
-                  state-choropleth rates are computed against awards
-                  whose period of performance spanned Apr 30, 2025 (the
-                  freeze date) — the population actually at risk that
-                  day. This denominator is exogenous to the disruption,
-                  so termination percentages reflect what happened to a
-                  fixed cohort rather than to a moving definition."),
           tags$li(strong("Citizen-tracker undercount."), " The
                   terminations dataset is volunteer-maintained
                   (Ross / Delaney). Coverage of small-dollar or
@@ -341,16 +333,7 @@ ui <- bslib::page_navbar(
                   federal action by 30-60 days. The data was pulled
                   Apr 6, 2026, so March 2026 transactions only include
                   through Mar 14. The March marker is shown open to flag
-                  this."),
-          tags$li(strong("Topic regex is illustrative."), " Topic
-                  clusters are derived by matching project-title text;
-                  many awards plausibly fit multiple topics, and the
-                  first matching pattern wins. Use for orientation, not
-                  for authoritative subject classification."),
-          tags$li(strong("Single specification."), " Headline numbers
-                  use one baseline window and one at-risk-pool
-                  definition; no robustness checks under alternative
-                  specifications are reported.")
+                  this.")
         ),
 
         p(style = sprintf("color: %s; font-size: 0.85rem;", stern_text_muted),
