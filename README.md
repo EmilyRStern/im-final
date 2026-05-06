@@ -1,4 +1,4 @@
-# NSF Grant Lifecycle Disruption Analysis
+# NSF Funding Disruption for Universities
 
 > EPPS 6354 — Information Management — Spring 2026
 > University of Texas at Dallas — Emily Stern
@@ -24,7 +24,7 @@ tabs (Timeline, Lifecycle, Impact, Recovery, Methods).
 | Source | What it provides | Acquired |
 |---|---|---|
 | **USAspending.gov** | Transaction-level NSF assistance award data, FY23–FY26 | Bulk Assistance Full extracts, agency code 049, downloaded 2026-04-06 |
-| **Grants.gov** | NSF opportunity listings (posted, forecasted, archived) | Bulk XML extract from grants.gov, downloaded 2026-04-29 |
+| **Grants.gov** | NSF opportunity listings (posted, forecasted, archived) | Extract from grants.gov, downloaded 2026-04-29 |
 | **Grant Watch (NSF terminations)** | Citizen-science tracker of awards terminated, frozen, or reinstated under the new administration; maintained by Noam Ross (rOpenSci) and Scott Delaney (Harvard) | CSV export |
 
 ## Stack
