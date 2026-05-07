@@ -1,0 +1,4 @@
+# Quarto build output
+final.html
+final_files/
+.quarto/

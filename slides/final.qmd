@@ -1,0 +1,73 @@
+---
+title: "NSF Funding Disruption for Universities"
+subtitle: ""
+author: "Emily Stern"
+institute: "EPPS 6354 · Information Management · UT Dallas · Spring 2026"
+format:
+  revealjs:
+    theme: [default, stern.scss]
+    slide-number: true
+    preview-links: auto
+    width: 1280
+    height: 720
+    footer: "NSF Funding Disruption · Stern · Spring 2026"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Research question
+
+> How has **NSF** grant activity for **U.S. academic institutions** changed since
+> the [April 30, 2025 funding freeze]{.anchor-date} and the subsequent
+> EO 14332 (Improving Oversight of Federal Grantmaking, Aug 7, 2025),
+> particularly across the lifecycle of awards **obligated**, **terminated**, and
+> **reinstated**?
+
+
+
+## Data sources
+
+| Source | What it provides |
+|---|---|
+| **USAspending.gov** | Transaction-level NSF assistance data, FY23–FY26 — obligations, deobligations, terminations as recorded |
+| **Grants.gov** | NSF opportunity catalog|
+| **Grant Watch** | Citizen-science tracker of NSF terminations & reinstatements (Ross + Delaney) |
+
+All three sources are joined into a Postgres schema on Neon and surfaced
+through a Shiny dashboard.
+
+
+## {background-iframe="schema.html" background-interactive="true"}
+
+[](schema.html){.fullscreen-link target="_blank"}
+
+::: {.notes}
+Six tables joining Grants.gov, USAspending, and Grant Watch.
+Not shown in the diagram: a `snapshots` + `change_log` audit pair —
+schema-ready for future Grants.gov diff runs, not populated yet.
+:::
+
+
+
+## {background-iframe="https://019df1c6-3ad9-2e4e-a581-1a7cb7832261.share.connect.posit.cloud/" background-interactive="true"}
+
+[↗](https://019df1c6-3ad9-2e4e-a581-1a7cb7832261.share.connect.posit.cloud/){.fullscreen-link target="_blank"}
+
+
+
+## References & AI use
+
+**Data**
+
+- USAspending.gov — Bulk Assistance extracts, agency code 049, downloaded 2026-04-06
+- Grants.gov — NSF opportunity extract, downloaded 2026-04-29
+- Grant Watch — Noam Ross (rOpenSci) & Scott Delaney (Harvard)
+
+**AI use disclosure**
+
+This project used generative AI tools (OpenAI GPT models, Anthropic Claude
+models) to support writing, literature review, project planning, and database
+schema design. Methodological decisions, policy interpretation, source
+verification, and final wording were produced and evaluated by the author.

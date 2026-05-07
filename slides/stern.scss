@@ -1,0 +1,122 @@
+/*-- scss:defaults --*/
+
+// Stern color tokens (mirrored from EmilyRStern/stern R/palettes.R).
+// Keep these in sync with the package — the deck should read as a sibling
+// of the dashboard.
+
+// Backgrounds & neutrals
+$stern-bg-primary:   #FBF8F1;  // page (cream)
+$stern-bg-secondary: #F2EDDF;  // sidebars / strips
+$stern-bg-surface:   #FFFFFF;  // panel
+
+// Text
+$stern-text-primary: #2B2A1F;  // headlines, KPI numerals
+$stern-text-body:    #4A4632;  // body
+$stern-text-muted:   #6E6A55;  // captions, source notes
+
+// Borders
+$stern-border:       #C9C0A4;
+$stern-border-soft:  #E5DEC2;
+
+// Categorical accents
+$stern-olive:   #5A6B3A;
+$stern-navy:    #2A3A5C;
+$stern-mustard: #C99B2A;  // canonical "highlight" color
+$stern-rust:    #B5623C;
+
+// Reveal.js variable overrides
+$body-bg:   $stern-bg-primary;
+$body-color: $stern-text-body;
+
+$presentation-heading-color:       $stern-text-primary;
+$presentation-heading-font-weight: 600;
+$presentation-font-size-root:      32px;
+
+$link-color:       $stern-olive;
+$link-color-hover: $stern-mustard;
+
+$selection-bg:     $stern-mustard;
+$selection-color:  $stern-text-primary;
+
+
+/*-- scss:rules --*/
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal h1, .reveal h2, .reveal h3 {
+  text-transform: none;
+  letter-spacing: -0.01em;
+}
+
+.reveal .slide-number {
+  color: $stern-text-muted;
+  background: transparent;
+}
+
+.reveal .footer {
+  color: $stern-text-muted;
+  font-size: 0.55em;
+}
+
+// Tables - match the dashboard's restrained look
+.reveal table {
+  border-collapse: collapse;
+  font-size: 0.75em;
+  margin: 0.5em 0;
+}
+.reveal table th {
+  border-bottom: 2px solid $stern-border;
+  color: $stern-text-primary;
+  text-align: left;
+  padding: 0.4em 0.75em;
+}
+.reveal table td {
+  border-bottom: 1px solid $stern-border-soft;
+  padding: 0.35em 0.75em;
+}
+
+// Code blocks (used in schema-query slide)
+.reveal pre,
+.reveal code {
+  background: $stern-bg-secondary;
+  color: $stern-text-primary;
+  border: 1px solid $stern-border-soft;
+  border-radius: 4px;
+}
+
+// Callout for the "schema-stub but unpopulated" caveat
+.reveal .callout-stern {
+  background: $stern-bg-secondary;
+  border-left: 4px solid $stern-mustard;
+  padding: 0.6em 1em;
+  margin: 0.5em 0;
+  font-size: 0.85em;
+  color: $stern-text-body;
+}
+
+// Iframe-slide overlay link (top-right corner)
+.fullscreen-link {
+  position: fixed;
+  top: 1.2rem;
+  right: 1.4rem;
+  z-index: 1000;
+  font-size: 0.55em;
+  background: rgba(255, 255, 255, 0.85);
+  color: $stern-text-primary;
+  padding: 0.35em 0.7em;
+  border: 1px solid $stern-border;
+  border-radius: 3px;
+  text-decoration: none;
+}
+.fullscreen-link:hover {
+  background: $stern-mustard;
+  color: $stern-text-primary;
+}
+
+// Subtle "drop" emphasis for the Apr 30 freeze date — the deck's anchor
+.anchor-date {
+  color: $stern-rust;
+  font-weight: 600;
+}

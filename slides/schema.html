@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NSF Funding Disruption for Universities — Schema</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    background: #F5F0E8;
+    font-family: 'Source Sans 3', 'Gill Sans', sans-serif;
+    color: #3A4A45;
+  }
+  .frame {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 48px 48px;
+  }
+  h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #1C2B2B;
+    font-size: 28px;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+  .subtitle {
+    font-family: 'Source Serif 4', Charter, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: #3A4A45;
+    margin: 0 0 24px;
+  }
+  svg { display: block; width: 100%; height: auto; }
+  .footer {
+    color: #7A8C85;
+    font-size: 11px;
+    margin-top: 16px;
+    border-top: 1px solid #C8BFA8;
+    padding-top: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <h1>NSF Funding Disruption for Universities — Database Schema</h1>
+  <p class="subtitle">Six tables joining Grants.gov, USAspending, and Grant Watch into one Postgres instance.</p>
+
+<svg viewBox="0 0 1400 780" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', 'Gill Sans', sans-serif">
+  <defs>
+    <style>
+      .table-bg { fill: #FFFFFF; stroke: #C8BFA8; stroke-width: 1; }
+      .table-bg-emph { fill: #FFFFFF; stroke: #D4A843; stroke-width: 2.5; }
+      .hdr-teal { fill: #2D6A5F; }
+      .hdr-gold { fill: #D4A843; }
+      .hdr-text-light { fill: #FFFFFF; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 16px; }
+      .hdr-text-dark { fill: #1C2B2B; font-family: 'Playfair Display', Georgia, serif; font-weight: 700; font-size: 16px; }
+      .col { fill: #1C2B2B; font-size: 12px; }
+      .col-emph { fill: #1C2B2B; font-size: 12px; font-weight: 700; }
+      .typ { fill: #7A8C85; font-size: 10.5px; }
+      .pk { fill: #2D6A5F; font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; }
+      .fk { fill: #7A8C85; font-size: 9.5px; font-weight: 700; letter-spacing: 0.05em; }
+      .footnote { fill: #7A8C85; font-size: 10.5px; font-style: italic; }
+      .rel { stroke: #1C2B2B; stroke-width: 1.3; fill: none; }
+      .rel-emph { stroke: #D4A843; stroke-width: 2.4; fill: none; }
+      .rel-self { stroke: #7A8C85; stroke-width: 1; fill: none; }
+      .rel-lbl { fill: #3A4A45; font-size: 11px; font-style: italic; }
+      .rel-lbl-emph { fill: #1C2B2B; font-size: 11px; font-weight: 700; }
+      .rel-lbl-bg { fill: #F5F0E8; }
+      .panel-rule { stroke: #C8BFA8; stroke-width: 1; stroke-dasharray: 3,4; fill: none; }
+      .panel-label { fill: #7A8C85; font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; }
+      .compare-note-bg { fill: #FFF8E8; stroke: #D4A843; stroke-width: 1; stroke-dasharray: 2,3; }
+      .compare-note { fill: #3A4A45; font-size: 11px; }
+      .compare-note-emph { fill: #1C2B2B; font-size: 11px; font-weight: 700; }
+      .legend-label { fill: #7A8C85; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
+      .legend-text { fill: #3A4A45; font-size: 11px; }
+    </style>
+    <marker id="many" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
+      <path d="M2,2 L12,7 L2,12 M12,7 L12,2 M12,7 L12,12" fill="none" stroke="#1C2B2B" stroke-width="1.3"/>
+    </marker>
+    <marker id="many-gold" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto">
+      <path d="M2,2 L12,7 L2,12 M12,7 L12,2 M12,7 L12,12" fill="none" stroke="#D4A843" stroke-width="2"/>
+    </marker>
+    <marker id="one" markerWidth="14" markerHeight="14" refX="3" refY="7" orient="auto">
+      <path d="M3,3 L3,11 M6,3 L6,11" fill="none" stroke="#1C2B2B" stroke-width="1.3"/>
+    </marker>
+    <marker id="one-gold" markerWidth="14" markerHeight="14" refX="3" refY="7" orient="auto">
+      <path d="M3,3 L3,11 M6,3 L6,11" fill="none" stroke="#D4A843" stroke-width="2"/>
+    </marker>
+  </defs>
+
+  <!-- ============================================================ -->
+  <!-- LEFT PANEL: Pre-award (opportunities)                        -->
+  <!-- ============================================================ -->
+  <rect class="panel-rule" x="20" y="60" width="320" height="500" rx="6" ry="6"/>
+  <text class="panel-label" x="34" y="82">PRE-AWARD  ·  GRANTS.GOV</text>
+
+  <!-- opportunities -->
+  <g transform="translate(40, 100)">
+    <rect class="table-bg" width="280" height="240"/>
+    <rect class="hdr-teal" width="280" height="34"/>
+    <text class="hdr-text-light" x="14" y="24">opportunities</text>
+
+    <text class="pk" x="14" y="56">PK</text>
+    <text class="col-emph" x="44" y="56">opportunity_id</text>
+    <text class="typ" x="204" y="56">varchar</text>
+
+    <text class="fk" x="14" y="76">FK</text>
+    <text class="col" x="44" y="76">agency_id</text>
+    <text class="typ" x="204" y="76">int</text>
+
+    <text class="col" x="44" y="96">title</text>
+    <text class="typ" x="204" y="96">varchar</text>
+
+    <text class="col" x="44" y="116">cfda_numbers</text>
+    <text class="typ" x="204" y="116">varchar</text>
+
+    <text class="col" x="44" y="136">post_date</text>
+    <text class="typ" x="204" y="136">date</text>
+
+    <text class="col" x="44" y="156">close_date</text>
+    <text class="typ" x="204" y="156">date</text>
+
+    <text class="col" x="44" y="176">estimated_total_funding</text>
+    <text class="typ" x="204" y="176">numeric</text>
+
+    <text class="col" x="44" y="196">is_active</text>
+    <text class="typ" x="204" y="196">bool</text>
+
+    <line x1="14" y1="210" x2="266" y2="210" stroke="#EDE8DC"/>
+    <text class="footnote" x="14" y="228">Grants.gov: ~1.3k NSF opps</text>
+  </g>
+
+  <!-- comparison annotation between panels -->
+  <g transform="translate(40, 380)">
+    <rect class="compare-note-bg" width="280" height="100" rx="4" ry="4"/>
+    <text class="compare-note-emph" x="14" y="22">Compared at the directorate level</text>
+    <text class="compare-note" x="14" y="42">No row-level FK joins opportunities to</text>
+    <text class="compare-note" x="14" y="58">awards. Grants.gov opportunity numbers</text>
+    <text class="compare-note" x="14" y="74">don't map cleanly to USAspending FAINs.</text>
+    <text class="compare-note" x="14" y="92" font-style="italic">See v_directorate_resilience.</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- RIGHT PANEL: Awarded + post-award                            -->
+  <!-- ============================================================ -->
+  <rect class="panel-rule" x="380" y="60" width="1000" height="660" rx="6" ry="6"/>
+  <text class="panel-label" x="394" y="82">AWARDED  ·  USASPENDING + GRANT WATCH</text>
+
+  <!-- agencies (top of right panel) -->
+  <g transform="translate(400, 100)">
+    <rect class="table-bg" width="240" height="180"/>
+    <rect class="hdr-teal" width="240" height="34"/>
+    <text class="hdr-text-light" x="14" y="24">agencies</text>
+
+    <text class="pk" x="14" y="56">PK</text>
+    <text class="col-emph" x="44" y="56">agency_id</text>
+    <text class="typ" x="170" y="56">int</text>
+
+    <text class="fk" x="14" y="76">UK</text>
+    <text class="col" x="44" y="76">agency_code</text>
+    <text class="typ" x="170" y="76">varchar</text>
+
+    <text class="col" x="44" y="96">agency_name</text>
+    <text class="typ" x="170" y="96">varchar</text>
+
+    <text class="col" x="44" y="116">agency_level</text>
+    <text class="typ" x="170" y="116">varchar</text>
+
+    <text class="fk" x="14" y="136">FK</text>
+    <text class="col" x="44" y="136">parent_agency_id</text>
+    <text class="typ" x="170" y="136">int</text>
+
+    <line x1="14" y1="150" x2="226" y2="150" stroke="#EDE8DC"/>
+    <text class="footnote" x="14" y="168">NSF top + 11 directorates</text>
+
+    <!-- self loop -->
+    <path class="rel-self" d="M 240,135 Q 270,135 270,90 Q 270,55 240,55"/>
+    <circle cx="240" cy="55" r="2" fill="#7A8C85"/>
+    <text class="rel-lbl" x="248" y="92" font-size="9.5">self FK</text>
+  </g>
+
+  <!-- recipients (top-right of right panel) -->
+  <g transform="translate(1100, 100)">
+    <rect class="table-bg" width="260" height="200"/>
+    <rect class="hdr-teal" width="260" height="34"/>
+    <text class="hdr-text-light" x="14" y="24">recipients</text>
+
+    <text class="pk" x="14" y="56">PK</text>
+    <text class="col-emph" x="44" y="56">recipient_uei</text>
+    <text class="typ" x="184" y="56">varchar</text>
+
+    <text class="col" x="44" y="76">recipient_name</text>
+    <text class="typ" x="184" y="76">varchar</text>
+
+    <text class="fk" x="14" y="96">FK</text>
+    <text class="col" x="44" y="96">parent_uei</text>
+    <text class="typ" x="184" y="96">varchar</text>
+
+    <text class="col" x="44" y="116">state_code</text>
+    <text class="typ" x="184" y="116">varchar</text>
+
+    <text class="col" x="44" y="136">city_name</text>
+    <text class="typ" x="184" y="136">varchar</text>
+
+    <text class="col" x="44" y="156">county_name, zip</text>
+    <text class="typ" x="184" y="156">varchar</text>
+
+    <line x1="14" y1="170" x2="246" y2="170" stroke="#EDE8DC"/>
+    <text class="footnote" x="14" y="188">UEI registry; parent rollup</text>
+
+    <!-- self loop -->
+    <path class="rel-self" d="M 260,115 Q 290,115 290,80 Q 290,55 260,55"/>
+    <circle cx="260" cy="55" r="2" fill="#7A8C85"/>
+    <text class="rel-lbl" x="268" y="86" font-size="9.5">self FK</text>
+  </g>
+
+  <!-- transactions (bottom-left of right panel) -->
+  <g transform="translate(400, 440)">
+    <rect class="table-bg-emph" width="280" height="240"/>
+    <rect class="hdr-gold" width="280" height="34"/>
+    <text class="hdr-text-dark" x="14" y="24">transactions</text>
+
+    <text class="pk" x="14" y="56">PK</text>
+    <text class="col-emph" x="44" y="56">transaction_unique_key</text>
+    <text class="typ" x="204" y="56">varchar</text>
+
+    <text class="fk" x="14" y="76">FK</text>
+    <text class="col" x="44" y="76">award_unique_key</text>
+    <text class="typ" x="204" y="76">varchar</text>
+
+    <text class="col" x="44" y="96">action_date</text>
+    <text class="typ" x="204" y="96">date</text>
+
+    <text class="col" x="44" y="116">action_type_description</text>
+    <text class="typ" x="204" y="116">varchar</text>
+
+    <text class="col-emph" x="44" y="136">federal_action_obligation</text>
+    <text class="typ" x="204" y="136">numeric</text>
+
+    <text class="col" x="44" y="156">awarding_sub_agency_name</text>
+    <text class="typ" x="204" y="156">varchar</text>
+
+    <text class="col" x="44" y="176">cfda_number</text>
+    <text class="typ" x="204" y="176">varchar</text>
+
+    <text class="col" x="44" y="196">recipient_uei</text>
+    <text class="typ" x="204" y="196">varchar</text>
+
+    <line x1="14" y1="210" x2="266" y2="210" stroke="#EDE8DC"/>
+    <text class="footnote" x="14" y="226">USAspending: ~80k transactions.</text>
+    <text class="footnote" x="14" y="240">Sign of obligation = the disruption signal.</text>
+  </g>
+
+  <!-- awards (center of right panel — the hub) -->
+  <g transform="translate(740, 440)">
+    <rect class="table-bg-emph" width="260" height="260"/>
+    <rect class="hdr-gold" width="260" height="34"/>
+    <text class="hdr-text-dark" x="14" y="24">awards</text>
+
+    <text class="pk" x="14" y="56">PK</text>
+    <text class="col-emph" x="44" y="56">award_unique_key</text>
+    <text class="typ" x="184" y="56">varchar</text>
+
+    <text class="fk" x="14" y="76">UK</text>
+    <text class="col" x="44" y="76">award_id_fain</text>
+    <text class="typ" x="184" y="76">varchar</text>
+
+    <text class="fk" x="14" y="96">FK</text>
+    <text class="col" x="44" y="96">recipient_uei</text>
+    <text class="typ" x="184" y="96">varchar</text>
+
+    <text class="fk" x="14" y="116">FK</text>
+    <text class="col" x="44" y="116">awarding_agency_id</text>
+    <text class="typ" x="184" y="116">int</text>
+
+    <text class="col" x="44" y="136">awarding_sub_agency_name</text>
+    <text class="typ" x="184" y="136">varchar</text>
+
+    <text class="col" x="44" y="156">total_obligated_amount</text>
+    <text class="typ" x="184" y="156">numeric</text>
+
+    <text class="col" x="44" y="176">total_outlayed_amount</text>
+    <text class="typ" x="184" y="176">numeric</text>
+
+    <text class="col" x="44" y="196">period_of_perf_start/end</text>
+    <text class="typ" x="184" y="196">date</text>
+
+    <text class="col" x="44" y="216">is_active</text>
+    <text class="typ" x="184" y="216">bool</text>
+
+    <line x1="14" y1="230" x2="246" y2="230" stroke="#EDE8DC"/>
+    <text class="footnote" x="14" y="248">USAspending: one row per award</text>
+  </g>
+
+  <!-- terminations (bottom-right of right panel) -->
+  <g transform="translate(1080, 440)">
+    <rect class="table-bg" width="280" height="260"/>
+    <rect class="hdr-teal" width="280" height="34"/>
+    <text class="hdr-text-light" x="14" y="24">terminations</text>
+
+    <text class="pk" x="14" y="56">PK</text>
+    <text class="col-emph" x="44" y="56">termination_id</text>
+    <text class="typ" x="204" y="56">int</text>
+
+    <text class="fk" x="14" y="76">FK</text>
+    <text class="col" x="44" y="76">award_id_fain</text>
+    <text class="typ" x="204" y="76">varchar</text>
+
+    <text class="col" x="44" y="96">project_title</text>
+    <text class="typ" x="204" y="96">varchar</text>
+
+    <text class="col" x="44" y="116">current_status</text>
+    <text class="typ" x="204" y="116">varchar</text>
+
+    <text class="col" x="44" y="136">latest_termination_date</text>
+    <text class="typ" x="204" y="136">date</text>
+
+    <text class="col" x="44" y="156">reinstated</text>
+    <text class="typ" x="204" y="156">bool</text>
+
+    <text class="col-emph" x="44" y="176">post_termination_deobligation</text>
+    <text class="typ" x="204" y="176">numeric</text>
+
+    <text class="col" x="44" y="196">directorate, division</text>
+    <text class="typ" x="204" y="196">varchar</text>
+
+    <text class="col" x="44" y="216">nsf_total_budget</text>
+    <text class="typ" x="204" y="216">numeric</text>
+
+    <line x1="14" y1="230" x2="266" y2="230" stroke="#EDE8DC"/>
+    <text class="footnote" x="14" y="246">Grant Watch: ~2k tracked</text>
+    <text class="footnote" x="14" y="260">terminations + reinstatements</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- RELATIONSHIPS                                                -->
+  <!-- ============================================================ -->
+
+  <!-- agencies → opportunities (crosses panels) -->
+  <path class="rel" d="M 400,190 L 320,190" marker-start="url(#one)" marker-end="url(#many)"/>
+  <rect class="rel-lbl-bg" x="335" y="180" width="50" height="16"/>
+  <text class="rel-lbl" x="343" y="192">posts</text>
+
+  <!-- agencies → awards (down within right panel) -->
+  <path class="rel" d="M 520,280 L 520,380 L 800,380 L 800,440" marker-start="url(#one)" marker-end="url(#many)"/>
+  <rect class="rel-lbl-bg" x="640" y="370" width="80" height="16"/>
+  <text class="rel-lbl" x="648" y="382">awards via</text>
+
+  <!-- recipients → awards -->
+  <path class="rel" d="M 1230,300 L 1230,380 L 920,380 L 920,440" marker-start="url(#one)" marker-end="url(#many)"/>
+  <rect class="rel-lbl-bg" x="1050" y="370" width="74" height="16"/>
+  <text class="rel-lbl" x="1058" y="382">receives</text>
+
+  <!-- awards → transactions (EMPHASIZED) -->
+  <path class="rel-emph" d="M 740,560 L 680,560" marker-start="url(#one-gold)" marker-end="url(#many-gold)"/>
+  <rect class="rel-lbl-bg" x="685" y="548" width="62" height="16"/>
+  <text class="rel-lbl-emph" x="693" y="560">has many</text>
+
+  <!-- awards → terminations -->
+  <path class="rel" d="M 1000,560 L 1080,560" marker-start="url(#one)" marker-end="url(#many)"/>
+  <rect class="rel-lbl-bg" x="1010" y="548" width="64" height="16"/>
+  <text class="rel-lbl" x="1018" y="560">terminated</text>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND                                                        -->
+  <!-- ============================================================ -->
+  <g transform="translate(40, 740)">
+    <text class="legend-label" x="0" y="0">LEGEND</text>
+
+    <rect x="0" y="14" width="14" height="14" fill="#2D6A5F"/>
+    <text class="legend-text" x="20" y="24">reference / context table</text>
+
+    <rect x="200" y="14" width="14" height="14" fill="#D4A843"/>
+    <text class="legend-text" x="220" y="24">disruption-signal table</text>
+
+    <line x1="400" y1="21" x2="446" y2="21" class="rel" marker-start="url(#one)" marker-end="url(#many)"/>
+    <text class="legend-text" x="456" y="24">enforced FK (one → many)</text>
+
+    <line x1="650" y1="21" x2="696" y2="21" class="rel-emph" marker-start="url(#one-gold)" marker-end="url(#many-gold)"/>
+    <text class="legend-text" x="706" y="24">core deobligation signal</text>
+
+    <rect x="930" y="14" width="14" height="14" fill="#FFF8E8" stroke="#D4A843" stroke-dasharray="2,3"/>
+    <text class="legend-text" x="950" y="24">analytical comparison (in views)</text>
+  </g>
+</svg>
+
+  <p class="footer">
+    Sources: Grants.gov bulk XML extract; USAspending.gov Bulk Assistance, agency code 049; Grant Watch (Ross + Delaney). Schema defined in <code>scripts/02_setup_postgres.R</code>.
+  </p>
+</div>
+</body>
+</html>

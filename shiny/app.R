@@ -209,9 +209,7 @@ ui <- bslib::page_navbar(
                            stern_text_primary)),
         narrative_p(
           "Pick a state (or leave at \"All states\") and start typing
-           any part of an institution's name. Active funding spans the
-           full portfolio; termination metrics use the at-risk pool
-           (awards live on Apr 30, 2025) as denominator."),
+           any part of an institution's name."),
 
         div(style = "max-width: 1000px; margin-bottom: 14px;",
           layout_columns(
