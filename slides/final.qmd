@@ -1,0 +1,124 @@
+---
+title: "NSF Funding Disruption for Universities"
+subtitle: "Tracking the April 30, 2025 freeze through award terminations"
+author: "Emily Stern"
+institute: "EPPS 6354 · Information Management · UT Dallas · Spring 2026"
+format:
+  revealjs:
+    theme: [default, stern.scss]
+    slide-number: true
+    preview-links: auto
+    width: 1280
+    height: 720
+    footer: "NSF Funding Disruption · Stern · Spring 2026"
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+## Research question
+
+> How has **NSF** grant activity to **academic institutions** changed since
+> the [April 30, 2025 funding freeze]{.anchor-date} and the subsequent
+> **EO 14332** *(Improving Oversight of Federal Grantmaking, Aug 7, 2025)* —
+> across the lifecycle of awards **obligated**, **terminated**, and
+> **reinstated** — and which **directorates, programs, and universities**
+> absorbed the largest share of the disruption?
+
+::: {.callout-stern}
+**Scope note.** Earlier drafts of this project also tracked Grants.gov
+opportunity *removals*. The schema still supports that audit trail
+(`change_log`), but only one Grants.gov snapshot has been loaded, so
+opportunity-level rescissions are not analyzed here.
+:::
+
+
+## Data sources
+
+| Source | What it provides |
+|---|---|
+| **USAspending.gov** | Transaction-level NSF assistance data, FY23–FY26 — obligations, deobligations, terminations as recorded |
+| **Grants.gov** | NSF opportunity catalog *(single snapshot — schema supports diffs, no diff loaded yet)* |
+| **Grant Watch** | Citizen-science tracker of NSF terminations & reinstatements (Ross + Delaney) |
+
+All three sources are joined into a Postgres schema on Neon and surfaced
+through a Shiny dashboard.
+
+
+## Schema {background-iframe="schema.html" background-interactive="true"}
+
+[Open in new tab ↗](schema.html){.fullscreen-link target="_blank"}
+
+::: {.notes}
+Six tables joining Grants.gov, USAspending, and Grant Watch.
+Not shown in the diagram: a `snapshots` + `change_log` audit pair —
+schema-ready for future Grants.gov diff runs, not populated yet.
+:::
+
+
+## Querying the schema: key questions
+
+| Question | Tables joined |
+|---|---|
+| Which awards were **terminated** under the new administration? | `awards` ⋈ `terminations` |
+| Did terminated awards **reinstate**, and how fast? | `terminations` *(reinstated, reinstatement_date)* |
+| Which **directorates** are most affected? | `transactions` ⋈ `agencies` *(NSF parent → 11 directorates)* |
+| Which **universities** are most affected? | `awards` ⋈ `recipients` *(academic-institution filter)* |
+| How is disruption changing **over time**? | `transactions` + `terminations` on a shared month timeline |
+| *(Future)* Which opportunities **disappeared**? | `opportunities` ⋈ `change_log` *(empty until second snapshot)* |
+
+
+## Methodology highlights
+
+- **Anchor: April 30, 2025 funding freeze.** The operational shock; EO 14332 (Aug 7) formalizes oversight after the fact.
+- **At-risk pool = awards live on Apr 30, 2025** — denominator is exogenous to the disruption itself.
+- **Positive vs. negative obligations are kept separate.** Net obligation hides disruption ($100M new + $50M clawback ≠ "$50M"); views split `gross_obligated` from `gross_deobligated`.
+- **Same-month FY23–25 baseline.** Controls for NSF's annual August spike / October trough; Feb 2024 TIP $151M administrative re-obligation excluded so it doesn't inflate the baseline.
+- **Citizen-tracker undercount detection.** Awards with >$100K post-freeze net deobligation but *no* termination record are surfaced as possible untracked disruption.
+
+
+## The dashboard {background-iframe="https://connect.posit.cloud/emilyrstern/content/019df1ae-8f70-b795-8b7a-2be95508a9fa" background-interactive="true"}
+
+[Open in new tab ↗](https://connect.posit.cloud/emilyrstern/content/019df1ae-8f70-b795-8b7a-2be95508a9fa){.fullscreen-link target="_blank"}
+
+
+## Differentiating contribution
+
+This dashboard builds on **Grant Watch** (Ross + Delaney) and the **Urban
+Institute's** July 2025 keyword-cancellation breakdown. It extends both with:
+
+1. **NEW-obligation pre-award drop per directorate** — FY26 H1 vs. FY25 H1
+2. **Same-month FY23–25 seasonal baseline** — separates disruption from the August/October cycle
+3. **Reinstatement dynamics** post-cancellation — velocity, not just counts
+4. **USAspending cross-validation** — surfacing likely tracker undercount
+
+
+## Limitations & next steps
+
+::: {.incremental}
+- **Opportunity-level removals not yet detected.** `change_log` is a schema
+  stub; would require a second Grants.gov snapshot and a diff job.
+- **NSF only.** The proposal scoped five agencies; narrowed to NSF for depth.
+  The schema generalizes — `agencies` is already a parent/child rollup table.
+- **Termination data is citizen-curated.** Cross-validation against
+  USAspending net-deobligations partially mitigates undercount.
+- **Posit Connect free tier sleeps after idle** — the live demo above may
+  take ~5–10 s to wake on first load.
+:::
+
+
+## References & AI use
+
+**Data**
+
+- USAspending.gov — Bulk Assistance extracts, agency code 049, downloaded 2026-04-06
+- Grants.gov — NSF opportunity extract, downloaded 2026-04-29
+- Grant Watch — Noam Ross (rOpenSci) & Scott Delaney (Harvard)
+
+**AI use disclosure**
+
+This project used generative AI tools (OpenAI GPT models, Anthropic Claude
+models) to support writing, literature review, project planning, and database
+schema design. Methodological decisions, policy interpretation, source
+verification, and final wording were produced and evaluated by the author.
